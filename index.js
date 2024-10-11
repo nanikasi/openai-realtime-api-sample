@@ -92,7 +92,7 @@ fastify.all("/incoming-call", async (request, reply) => {
                           <Response>
                               <Say>O.K.</Say>
                               <Connect>
-                                  <Stream url="wss://${request.headers.host}/media-stream" />
+                                  <Stream url="wss://${request.headers.host}/media-stream?number=${encodeURIComponent(number)}&name=${encodeURIComponent(name)}&reserve_date=${encodeURI(reserve_date)}" />
                               </Connect>
                           </Response>`;
 
@@ -103,6 +103,11 @@ fastify.all("/incoming-call", async (request, reply) => {
 fastify.register(async (fastify) => {
   fastify.get("/media-stream", { websocket: true }, (connection, req) => {
     console.log("Client connected");
+
+    const { number, name, reserve_date } = req.query;
+    console.log(number);
+    console.log(name);
+    console.log(reserve_date);
 
     const openAiWs = new WebSocket(
       "wss://api.openai.com/v1/realtime?model=gpt-4o-realtime-preview-2024-10-01",
