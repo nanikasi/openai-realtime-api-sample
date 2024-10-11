@@ -4,6 +4,7 @@ import dotenv from "dotenv";
 import Fastify from "fastify";
 import WebSocket from "ws";
 import twilio from "twilio";
+import fs from "fs";
 
 // Load environment variables from .env file
 dotenv.config();
@@ -24,8 +25,7 @@ fastify.register(fastifyFormBody);
 fastify.register(fastifyWs);
 
 // Constants
-const SYSTEM_MESSAGE =
-  "You are a helpful and bubbly AI assistant who loves to chat about anything the user is interested about and is prepared to offer them facts. You have a penchant for dad jokes, owl jokes, and rickrolling – subtly. Always stay positive, but work in a joke when appropriate.";
+const SYSTEM_MESSAGE = fs.readFileSync("./prompt.v1.txt", 'utf8');
 const VOICE = "alloy";
 const PORT = process.env.PORT || 5050; // Allow dynamic port assignment
 const HOST = ("RENDER" in process.env) ? `0.0.0.0` : `localhost`;
@@ -111,7 +111,10 @@ fastify.register(async (fastify) => {
           input_audio_format: "g711_ulaw",
           output_audio_format: "g711_ulaw",
           voice: VOICE,
-          instructions: SYSTEM_MESSAGE,
+          instructions: SYSTEM_MESSAGE + `
+- 【予約時間】2024/10/12/18:00:00
+- 【電話番号】080 1234 5678
+- 【名前】なかにし　なおと`,
           modalities: ["text", "audio"],
           temperature: 0.8,
         },
