@@ -92,7 +92,7 @@ fastify.all("/incoming-call", async (request, reply) => {
                           <Response>
                               <Say>O.K.</Say>
                               <Connect>
-                                  <Stream url="wss://${request.headers.host}/media-stream?number=${encodeURIComponent(number)}&name=${encodeURIComponent(name)}&reserveDate=${encodeURI(reserve_date)}" />
+                                  <Stream url="wss://${request.headers.host}/media-stream?number=${encodeURIComponent(number)}&name=${encodeURIComponent(name)}&reserve_date=${encodeURI(reserve_date)}" />
                               </Connect>
                           </Response>`;
 
