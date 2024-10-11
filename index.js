@@ -74,7 +74,7 @@ fastify.post("/call", async (request, reply) => {
     const call = await client.calls.create({
       to: restaurant_number, // The number to call
       from: TWILIO_PHONE_NUMBER, // Your Twilio phone number
-      url: `https://${request.headers.host}/incoming-call?number=${encodeURIComponent(number)}&name=${encodeURIComponent(name)}&reserveDate=${encodeURI(reserve_date)}`, // The URL for TwiML instructions
+      url: `https://${request.headers.host}/incoming-call?number=${encodeURIComponent(number)}&name=${encodeURIComponent(name)}&reserve_date=${encodeURI(reserve_date)}`, // The URL for TwiML instructions
     });
 
     reply.send({ message: `Calling ${number}`, callSid: call.sid });
