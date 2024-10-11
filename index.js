@@ -74,7 +74,7 @@ fastify.post("/call", async (request, reply) => {
     const call = await client.calls.create({
       to: restaurant_number, // The number to call
       from: TWILIO_PHONE_NUMBER, // Your Twilio phone number
-      url: `https://${request.headers.host}/incoming-call?number=${encodeURIComponent(number)}&name=${encodeURIComponent(name)}&reserve_date=${encodeURI(reserve_date)}`, // The URL for TwiML instructions
+      url: `https://${request.headers.host}/incoming-call?number=${encodeURIComponent(number)}&name=${encodeURIComponent(name)}&reserve_date=${encodeURIComponent(reserve_date)}`, // The URL for TwiML instructions
     });
 
     reply.send({ message: `Calling ${number}`, callSid: call.sid });
@@ -104,7 +104,8 @@ fastify.register(async (fastify) => {
   fastify.get("/media-stream", { websocket: true }, (connection, req) => {
     console.log("Client connected");
 
-    const { number, name, reserve_date } = req.query;
+    const url = new URL(req.url, `http://${req.headers.host}`);
+    const { number, name, reserve_date } = Object.fromEntries(url.searchParams);
     console.log(number);
     console.log(name);
     console.log(reserve_date);
@@ -122,7 +123,7 @@ fastify.register(async (fastify) => {
     let streamSid = null;
 
     const sendSessionUpdate = () => {
-      const prompt = `${SYSTEM_MESSAGE}\n- 【予約時間】15時\n- 【電話番号】08083241269 \n- 【名前】なかにしなおと`;
+      const prompt = `${SYSTEM_MESSAGE}\n- 【予約時間】${reserve_date}\n- 【電話番号】${number} \n- 【名前】${name}`;
 
       const sessionUpdate = {
         type: "session.update",
