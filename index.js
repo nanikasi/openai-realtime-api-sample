@@ -3,17 +3,20 @@ import fastifyWs from "@fastify/websocket";
 import dotenv from "dotenv";
 import Fastify from "fastify";
 import WebSocket from "ws";
+import twilio from "twilio";
 
 // Load environment variables from .env file
 dotenv.config();
 
 // Retrieve the OpenAI API key from environment variables. You must have OpenAI Realtime API access.
-const { OPENAI_API_KEY } = process.env;
+const { OPENAI_API_KEY, TWILIO_ACCOUNT_SID, TWILIO_AUTH_TOKEN, TWILIO_PHONE_NUMBER } = process.env;
 
-if (!OPENAI_API_KEY) {
-  console.error("Missing OpenAI API key. Please set it in the .env file.");
-  process.exit(1);
+if (!OPENAI_API_KEY || !TWILIO_ACCOUNT_SID || !TWILIO_AUTH_TOKEN || !TWILIO_PHONE_NUMBER) {
+    console.error("Missing required environment variables. Please set them in the .env file.");
+    process.exit(1);
 }
+
+const client = twilio(TWILIO_ACCOUNT_SID, TWILIO_AUTH_TOKEN);
 
 // Initialize Fastify
 const fastify = Fastify();
@@ -59,6 +62,28 @@ fastify.all("/incoming-call", async (request, reply) => {
                           </Response>`;
 
   reply.type("text/xml").send(twimlResponse);
+});
+
+fastify.post("/call", async (request, reply) => {
+    const number = "+818083241269";
+  
+    if (!number) {
+      return reply.status(400).send({ error: "Phone number is required" });
+    }
+  
+    try {
+      // Make the call using Twilio
+      const call = await client.calls.create({
+        to: number, // The number to call
+        from: TWILIO_PHONE_NUMBER, // Your Twilio phone number
+        url: `https://${request.headers.host}/incoming-call` // The URL for TwiML instructions
+      });
+  
+      reply.send({ message: `Calling ${number}`, callSid: call.sid });
+    } catch (error) {
+      console.error("Error making call:", error);
+      reply.status(500).send({ error: "Failed to make the call" });
+    }
 });
 
 // WebSocket route for media-stream
